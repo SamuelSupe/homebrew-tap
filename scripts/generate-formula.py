@@ -241,7 +241,7 @@ def formula(tag: str, version: tuple[int, int, int], checksums: dict[str, str]) 
   end
 
   def install
-    binary = Dir["git-rg_v#{{version}}_*/git-rg"].first
+    binary = Dir["git-rg", "git-rg_v#{{version}}_*/git-rg"].find {{ |path| File.file?(path) }}
     raise "git-rg binary is missing from the release archive" unless binary
 
     bin.install binary => "git-rg"
