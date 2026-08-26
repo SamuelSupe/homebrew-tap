@@ -1,0 +1,109 @@
+name: Update Homebrew formula
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: update-homebrew-tap
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.candidate.outputs.version }}
+      changed: ${{ steps.candidate.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: candidate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p candidate
+          version="$(python3 scripts/generate-formula.py --output candidate/git-rg.rb)"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+          changed=true
+          if test -f Formula/git-rg.rb && cmp -s Formula/git-rg.rb candidate/git-rg.rb; then
+            changed=false
+          fi
+          printf 'changed=%s\n' "$changed" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: candidate-formula
+          path: candidate/git-rg.rb
+          if-no-files-found: error
+          retention-days: 1
+
+  verify:
+    needs: prepare
+    if: needs.prepare.outputs.changed == 'true'
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate-formula
+          path: candidate
+      - name: Use candidate formula
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$(find candidate -type f -name git-rg.rb -print -quit)"
+          test -n "$candidate"
+          cp "$candidate" Formula/git-rg.rb
+      - uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049
+      - name: Install and test candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew uninstall --force git-rg >/dev/null 2>&1 || true
+          brew install --formula ./Formula/git-rg.rb
+          brew test git-rg
+          test "$(git-rg --version | tr -d '\r')" = "git-rg ${{ needs.prepare.outputs.version }}"
+
+  commit:
+    needs: [prepare, verify]
+    if: needs.prepare.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate-formula
+          path: candidate
+      - name: Commit changed formula with the workflow token
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          candidate="$(find candidate -type f -name git-rg.rb -print -quit)"
+          test -n "$candidate"
+          cp "$candidate" Formula/git-rg.rb
+          if git diff --quiet -- Formula/git-rg.rb && \
+             git ls-files --error-unmatch Formula/git-rg.rb >/dev/null 2>&1; then
+            echo "Formula is already current at ${VERSION}"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/git-rg.rb
+          git commit -m "chore: update git-rg to ${VERSION}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
