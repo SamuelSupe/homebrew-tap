@@ -57,13 +57,20 @@ jobs:
         with:
           name: candidate-formula
           path: candidate
-      - uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049
-      - name: Install and test candidate
+      - name: Stage candidate formula outside the checkout
         shell: bash
         run: |
           set -euo pipefail
           candidate="$(find "$GITHUB_WORKSPACE/candidate" -type f -name git-rg.rb -print -quit)"
           test -n "$candidate"
+          cp "$candidate" "$RUNNER_TEMP/git-rg.rb"
+      - uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049
+      - name: Install and test candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$RUNNER_TEMP/git-rg.rb"
+          test -f "$candidate"
           brew uninstall --force git-rg >/dev/null 2>&1 || true
           brew tap-new --no-git ci/candidate >/dev/null
           tap_dir="$(brew --repository ci/candidate)"
