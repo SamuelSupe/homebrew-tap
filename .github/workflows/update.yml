@@ -71,8 +71,12 @@ jobs:
         run: |
           set -euo pipefail
           brew uninstall --force git-rg >/dev/null 2>&1 || true
-          brew install --formula ./Formula/git-rg.rb
-          brew test git-rg
+          brew tap-new --no-git ci/candidate >/dev/null
+          tap_dir="$(brew --repository ci/candidate)"
+          mkdir -p "$tap_dir/Formula"
+          cp Formula/git-rg.rb "$tap_dir/Formula/git-rg.rb"
+          brew install --formula ci/candidate/git-rg
+          brew test ci/candidate/git-rg
           test "$(git-rg --version | tr -d '\r')" = "git-rg ${{ needs.prepare.outputs.version }}"
 
   commit:
