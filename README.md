@@ -60,5 +60,5 @@ persisted. Without a token, public GitHub API rate limits still apply.
 
 ## License
 
-The formula, generator, workflow, and documentation in this bucket are
+The formula, generator, workflow, and documentation in this tap are
 licensed under [MIT](LICENSE).

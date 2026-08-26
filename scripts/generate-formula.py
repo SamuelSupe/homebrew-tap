@@ -25,6 +25,8 @@ ARCHIVES = {
     "linux_arm64": "git-rg_{tag}_linux_arm64.tar.gz",
     "darwin_amd64": "git-rg_{tag}_darwin_amd64.tar.gz",
     "darwin_arm64": "git-rg_{tag}_darwin_arm64.tar.gz",
+    "windows_amd64": "git-rg_{tag}_windows_amd64.zip",
+    "windows_arm64": "git-rg_{tag}_windows_arm64.zip",
 }
 SCRIPT_ASSETS = ("install.sh", "install.ps1")
 CHECKSUMS_ASSET = "checksums.txt"
