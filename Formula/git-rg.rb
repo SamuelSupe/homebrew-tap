@@ -1,16 +1,16 @@
 class GitRg < Formula
   desc "Remote ripgrep for GitHub and GitLab without cloning repository history"
   homepage "https://github.com/SamuelSupe/git-rg"
-  version "0.4.0"
+  version "0.4.1"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.0/git-rg_v0.4.0_darwin_arm64.tar.gz"
-      sha256 "3f0c243e6792e5389859280dc14626365b0ad2945a9868b34be4c897e45434cb"
+      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.1/git-rg_v0.4.1_darwin_arm64.tar.gz"
+      sha256 "ff95bb20f4b89fbbb752483ab351098777bbec32700e070a8a666c840d4f10cf"
     elsif Hardware::CPU.intel?
-      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.0/git-rg_v0.4.0_darwin_amd64.tar.gz"
-      sha256 "3c1e31b845d8a8ca4c76d0ffc26903ca98f40ba8845772c4d9db45fd36e43453"
+      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.1/git-rg_v0.4.1_darwin_amd64.tar.gz"
+      sha256 "5ca5850805907815a8921cc9ce79059603648eef13c4a581cf786e17af23eea3"
     else
       odie "git-rg provides prebuilt macOS packages for arm64 and Intel only"
     end
@@ -18,11 +18,11 @@ class GitRg < Formula
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.0/git-rg_v0.4.0_linux_arm64.tar.gz"
-      sha256 "f6665402a16649f1c9df1ef1d044956a0aae57dcc2741ec2391f0113d9cab1cd"
+      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.1/git-rg_v0.4.1_linux_arm64.tar.gz"
+      sha256 "cdadd6865ded54e37e89c5cf2587ff23bd6899ceed328a61763f059fcc11b4f0"
     elsif Hardware::CPU.intel?
-      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.0/git-rg_v0.4.0_linux_amd64.tar.gz"
-      sha256 "c34f1c8bb4cceec4971bfbeb89ab2039c1e7f16f9451dd0611125df0bbe87133"
+      url "https://github.com/SamuelSupe/git-rg/releases/download/v0.4.1/git-rg_v0.4.1_linux_amd64.tar.gz"
+      sha256 "4e7b94ae1bc6f12614c27c86091bc7cbc80a7ae56c6e46cdb4686e4064a9a901"
     else
       odie "git-rg provides prebuilt Linux packages for arm64 and Intel only"
     end
